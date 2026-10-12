@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "examforge"
+version = "0.1.0"
+description = "Turn scanned or digital Indian exam papers into clean, printable, bilingual HTML."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+
+dependencies = [
+    "click>=8.1",
+    "pydantic>=2.5",
+    "pydantic-settings>=2.1",
+    "pyyaml>=6.0",
+    "pymupdf>=1.24",
+    "pillow>=10.0",
+    "numpy>=1.26",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+ocr = [
+    "paddleocr>=2.7",
+    "paddlepaddle>=2.6",
+    "pytesseract>=0.3.10",
+]
+browser = [
+    "playwright>=1.40",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+examforge = "examforge.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/examforge"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

@@ -1,0 +1,51 @@
+spec_version: 1
+
+rules:
+  R01_no_furniture:
+    severity: blocker
+    check: no_headers_footers_page_numbers
+
+  R02_no_branding:
+    severity: blocker
+    check: no_brand_text_or_logo
+
+  R03_no_watermark:
+    severity: blocker
+    check: watermark_residual
+    params:
+      max_corr: 0.05
+
+  R04_continuous:
+    severity: blocker
+    check: no_page_wrappers_or_breaks
+
+  R05_bilingual:
+    severity: blocker
+    check: en_hi_pairs_complete
+
+  R06_complete:
+    severity: blocker
+    check: numbering_continuity
+
+  R07_formulas:
+    severity: blocker
+    check: formula_roundtrip
+
+  R08_figures:
+    severity: blocker
+    check: figure_clean_border_and_present
+
+  R09_unicode:
+    severity: warn
+    check: devanagari_nfc_and_lexicon
+
+modes:
+  fast:
+    engines: ["E1"]
+    second_engine: on_flag
+    audit_sample: 0.05
+
+  max:
+    engines: ["E1", "E2"]
+    second_engine: always
+    audit_sample: 0.10

@@ -1,0 +1,37 @@
+# ExamForge configuration
+# Override defaults here. CLI flags take precedence over this file.
+
+mode: fast
+
+engines:
+  paddlevl:
+    model_name: PaddleOCR-VL-1.6
+    pipeline_version: "v1.6"
+    api_url: null
+    lang: ["en", "hi"]
+    use_gpu: false
+    timeout_s: 60.0
+  paddleocr:
+    model_name: PaddleOCR-VL-1.6
+    pipeline_version: "v1.6"
+    lang: ["en", "hi"]
+    use_gpu: false
+    timeout_s: 60.0
+  tesseract:
+    lang: ["eng+hin"]
+    timeout_s: 30.0
+
+browser:
+  pool_size: 2
+  timeout_ms: 30000
+
+agent:
+  enabled: false
+
+paths:
+  runs: ./runs
+  ledger: ./ledger
+  cache: ./.cache
+
+fail_policy: fail_page
+debug: false
