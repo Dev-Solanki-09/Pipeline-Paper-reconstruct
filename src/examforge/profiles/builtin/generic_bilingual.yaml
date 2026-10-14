@@ -1,0 +1,25 @@
+# Generic Bilingual Exam Profile (English / Hindi parallel columns)
+id: generic_bilingual
+name: Generic Bilingual Exam (English / Hindi)
+profile_version: "2.0.0"
+maturity: experimental
+extends:
+  - base
+
+languages:
+  - code: en
+    script: Latn
+    direction: ltr
+  - code: hi
+    script: Deva
+    direction: ltr
+
+language_layout: parallel_columns
+
+layout:
+  columns: 2
+  spans_allowed: true
+  reading_order: parallel
+
+output:
+  layout_mode: bilingual_columns

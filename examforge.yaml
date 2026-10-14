@@ -35,3 +35,18 @@ paths:
 
 fail_policy: fail_page
 debug: false
+
+# Feature flags for v2 release
+flags:
+  verifiers_v2: true
+  layout_v2: true
+  figures_v2: true
+  clean_v2: true
+  lang_v2: true
+  answers: true
+  s7_repair: true
+  bank: true
+  autoprofile: true
+  lessons: true
+  template_v2: true
+  exporters: true

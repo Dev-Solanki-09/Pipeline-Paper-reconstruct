@@ -1,0 +1,1931 @@
+{
+  "$defs": {
+    "Answer": {
+      "description": "Correct answer, if answer key is in scope.",
+      "properties": {
+        "correct_options": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Correct Options",
+          "type": "array"
+        },
+        "numeric_range": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numeric Range"
+        },
+        "numeric_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numeric Value"
+        }
+      },
+      "title": "Answer",
+      "type": "object"
+    },
+    "AnswerSpec": {
+      "description": "Detailed answer specification and range.",
+      "properties": {
+        "correct_options": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Correct Options",
+          "type": "array"
+        },
+        "numeric_range": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numeric Range"
+        },
+        "numeric_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numeric Value"
+        },
+        "text_solution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text Solution"
+        }
+      },
+      "title": "AnswerSpec",
+      "type": "object"
+    },
+    "BBox": {
+      "description": "Bounding box in pixel coordinates (origin top-left).",
+      "properties": {
+        "x1": {
+          "title": "X1",
+          "type": "integer"
+        },
+        "x2": {
+          "title": "X2",
+          "type": "integer"
+        },
+        "y1": {
+          "title": "Y1",
+          "type": "integer"
+        },
+        "y2": {
+          "title": "Y2",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x1",
+        "y1",
+        "x2",
+        "y2"
+      ],
+      "title": "BBox",
+      "type": "object"
+    },
+    "BlankNode": {
+      "properties": {
+        "expected_type": {
+          "default": "text",
+          "title": "Expected Type",
+          "type": "string"
+        },
+        "index": {
+          "default": 1,
+          "title": "Index",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "blank",
+          "default": "blank",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "BlankNode",
+      "type": "object"
+    },
+    "Block": {
+      "description": "Atomic unit of recognized content on a page.\n\nEvery piece of text, formula, or detected region is a Block.",
+      "properties": {
+        "bbox": {
+          "$ref": "#/$defs/BBox"
+        },
+        "bbox_norm": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox Norm"
+        },
+        "confidence": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "crop_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Crop Ref"
+        },
+        "drop_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Drop Reason"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "lang": {
+          "$ref": "#/$defs/Lang",
+          "default": "unknown"
+        },
+        "latex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latex"
+        },
+        "order": {
+          "default": 0,
+          "title": "Order",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/EngineSource"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/BlockStatus",
+          "default": "trusted"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/BlockType",
+          "default": "text"
+        }
+      },
+      "required": [
+        "id",
+        "page",
+        "bbox"
+      ],
+      "title": "Block",
+      "type": "object"
+    },
+    "BlockStatus": {
+      "description": "Trust level of a block's content.",
+      "enum": [
+        "trusted",
+        "disputed",
+        "repaired",
+        "human",
+        "dropped"
+      ],
+      "title": "BlockStatus",
+      "type": "string"
+    },
+    "BlockType": {
+      "description": "Classification of a recognized block on a page.",
+      "enum": [
+        "text",
+        "formula",
+        "figure",
+        "table",
+        "header",
+        "footer",
+        "page_number",
+        "watermark",
+        "logo",
+        "qr_code",
+        "url",
+        "unknown"
+      ],
+      "title": "BlockType",
+      "type": "string"
+    },
+    "Cell": {
+      "description": "A single cell in a table.",
+      "properties": {
+        "colspan": {
+          "default": 1,
+          "title": "Colspan",
+          "type": "integer"
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Lang"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "unknown",
+          "title": "Lang"
+        },
+        "rowspan": {
+          "default": 1,
+          "title": "Rowspan",
+          "type": "integer"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "title": "Cell",
+      "type": "object"
+    },
+    "CodeNode": {
+      "properties": {
+        "kind": {
+          "const": "code",
+          "default": "code",
+          "title": "Kind",
+          "type": "string"
+        },
+        "language": {
+          "default": "",
+          "title": "Language",
+          "type": "string"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "title": "CodeNode",
+      "type": "object"
+    },
+    "DocumentPart": {
+      "description": "Semantic document section / partition.",
+      "properties": {
+        "blocks": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "cover",
+            "instructions",
+            "section_header",
+            "answer_key",
+            "solutions",
+            "rough_work",
+            "omr"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "pages": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "DocumentPart",
+      "type": "object"
+    },
+    "EngineSource": {
+      "description": "A single engine's reading of a block.",
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BBox"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "confidence": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "engine": {
+          "title": "Engine",
+          "type": "string"
+        },
+        "latex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latex"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "engine"
+      ],
+      "title": "EngineSource",
+      "type": "object"
+    },
+    "ExamMetadata": {
+      "description": "Metadata harvested from cover/header before deletion.",
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "exam_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exam Name"
+        },
+        "series_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Series Code"
+        },
+        "source_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Type"
+        },
+        "subject": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subject"
+        },
+        "total_questions_expected": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Questions Expected"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        }
+      },
+      "title": "ExamMetadata",
+      "type": "object"
+    },
+    "Figure": {
+      "description": "A detected figure/diagram with its crop and classification.",
+      "properties": {
+        "bbox": {
+          "$ref": "#/$defs/BBox"
+        },
+        "classification": {
+          "$ref": "#/$defs/FigureClass",
+          "default": "unknown"
+        },
+        "crop_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Crop Path"
+        },
+        "format": {
+          "default": "png",
+          "title": "Format",
+          "type": "string"
+        },
+        "height_mm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height Mm"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "option_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Option Ref"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "perceptual_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Perceptual Hash"
+        },
+        "question_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question Ref"
+        },
+        "scale_class": {
+          "default": "img-md",
+          "title": "Scale Class",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/BlockStatus",
+          "default": "trusted"
+        },
+        "watermark_residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Watermark Residual"
+        },
+        "width_mm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Width Mm"
+        }
+      },
+      "required": [
+        "id",
+        "page",
+        "bbox"
+      ],
+      "title": "Figure",
+      "type": "object"
+    },
+    "FigureClass": {
+      "enum": [
+        "diagram",
+        "formula",
+        "table",
+        "logo",
+        "qr",
+        "photo",
+        "unknown"
+      ],
+      "title": "FigureClass",
+      "type": "string"
+    },
+    "FigureNode": {
+      "properties": {
+        "caption": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Caption",
+          "type": "object"
+        },
+        "figure_ref": {
+          "default": "",
+          "title": "Figure Ref",
+          "type": "string"
+        },
+        "kind": {
+          "const": "figure",
+          "default": "figure",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "FigureNode",
+      "type": "object"
+    },
+    "Issue": {
+      "description": "A problem detected during processing.",
+      "properties": {
+        "block_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Id"
+        },
+        "candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "element_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Element Id"
+        },
+        "evidence": {
+          "additionalProperties": true,
+          "title": "Evidence",
+          "type": "object"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "question_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question Id"
+        },
+        "resolution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolution"
+        },
+        "resolved": {
+          "default": false,
+          "title": "Resolved",
+          "type": "boolean"
+        },
+        "rule": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rule"
+        },
+        "severity": {
+          "$ref": "#/$defs/IssueSeverity",
+          "default": "warning"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "stage"
+      ],
+      "title": "Issue",
+      "type": "object"
+    },
+    "IssueSeverity": {
+      "enum": [
+        "blocker",
+        "warning",
+        "info"
+      ],
+      "title": "IssueSeverity",
+      "type": "string"
+    },
+    "Lang": {
+      "enum": [
+        "en",
+        "hi",
+        "mixed",
+        "unknown"
+      ],
+      "title": "Lang",
+      "type": "string"
+    },
+    "LanguageInfo": {
+      "description": "Declared language and script metadata.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "direction": {
+          "default": "ltr",
+          "enum": [
+            "ltr",
+            "rtl"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "script": {
+          "default": "Latin",
+          "title": "Script",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "LanguageInfo",
+      "type": "object"
+    },
+    "Marks": {
+      "description": "Grading / marking scheme for a question.",
+      "properties": {
+        "negative": {
+          "default": 1.0,
+          "title": "Negative",
+          "type": "number"
+        },
+        "partial": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Partial"
+        },
+        "positive": {
+          "default": 4.0,
+          "title": "Positive",
+          "type": "number"
+        }
+      },
+      "title": "Marks",
+      "type": "object"
+    },
+    "MatchColumnsNode": {
+      "properties": {
+        "kind": {
+          "const": "match_columns",
+          "default": "match_columns",
+          "title": "Kind",
+          "type": "string"
+        },
+        "left": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Left",
+          "type": "array"
+        },
+        "right": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Right",
+          "type": "array"
+        }
+      },
+      "title": "MatchColumnsNode",
+      "type": "object"
+    },
+    "MathNode": {
+      "properties": {
+        "code": {
+          "default": "",
+          "title": "Code",
+          "type": "string"
+        },
+        "display": {
+          "default": false,
+          "title": "Display",
+          "type": "boolean"
+        },
+        "kind": {
+          "const": "math",
+          "default": "math",
+          "title": "Kind",
+          "type": "string"
+        },
+        "notation": {
+          "default": "latex",
+          "enum": [
+            "latex",
+            "mhchem"
+          ],
+          "title": "Notation",
+          "type": "string"
+        },
+        "texts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Texts",
+          "type": "object"
+        }
+      },
+      "title": "MathNode",
+      "type": "object"
+    },
+    "Option": {
+      "description": "A single option (choice) within a question.",
+      "properties": {
+        "content": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "blank": "#/$defs/BlankNode",
+                "code": "#/$defs/CodeNode",
+                "figure": "#/$defs/FigureNode",
+                "match_columns": "#/$defs/MatchColumnsNode",
+                "math": "#/$defs/MathNode",
+                "raw_crop": "#/$defs/RawCropNode",
+                "statements": "#/$defs/StatementsNode",
+                "table": "#/$defs/TableNode",
+                "text": "#/$defs/TextNode"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextNode"
+              },
+              {
+                "$ref": "#/$defs/MathNode"
+              },
+              {
+                "$ref": "#/$defs/TableNode"
+              },
+              {
+                "$ref": "#/$defs/FigureNode"
+              },
+              {
+                "$ref": "#/$defs/StatementsNode"
+              },
+              {
+                "$ref": "#/$defs/MatchColumnsNode"
+              },
+              {
+                "$ref": "#/$defs/CodeNode"
+              },
+              {
+                "$ref": "#/$defs/BlankNode"
+              },
+              {
+                "$ref": "#/$defs/RawCropNode"
+              }
+            ]
+          },
+          "title": "Content",
+          "type": "array"
+        },
+        "figure_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Figure Ref"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "text_en": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Text En",
+          "type": "array"
+        },
+        "text_hi": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Text Hi",
+          "type": "array"
+        },
+        "text_str_en": {
+          "default": "",
+          "title": "Text Str En",
+          "type": "string"
+        },
+        "text_str_hi": {
+          "default": "",
+          "title": "Text Str Hi",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "title": "Option",
+      "type": "object"
+    },
+    "PageClassification": {
+      "enum": [
+        "cover",
+        "instructions",
+        "questions",
+        "answer_key",
+        "rough_work",
+        "blank",
+        "omr",
+        "unknown"
+      ],
+      "title": "PageClassification",
+      "type": "string"
+    },
+    "PageInfo": {
+      "description": "Per-page metadata from S0 intake.",
+      "properties": {
+        "blur_score": {
+          "default": 0.0,
+          "title": "Blur Score",
+          "type": "number"
+        },
+        "classification": {
+          "$ref": "#/$defs/PageClassification",
+          "default": "unknown"
+        },
+        "cleaned_image_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cleaned Image Path"
+        },
+        "column_count": {
+          "default": 1,
+          "title": "Column Count",
+          "type": "integer"
+        },
+        "contrast": {
+          "default": 0.0,
+          "title": "Contrast",
+          "type": "number"
+        },
+        "dpi": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dpi"
+        },
+        "has_annotation_ink": {
+          "default": false,
+          "title": "Has Annotation Ink",
+          "type": "boolean"
+        },
+        "has_text_layer": {
+          "default": false,
+          "title": "Has Text Layer",
+          "type": "boolean"
+        },
+        "height_px": {
+          "default": 0,
+          "title": "Height Px",
+          "type": "integer"
+        },
+        "image_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Path"
+        },
+        "is_two_page_spread": {
+          "default": false,
+          "title": "Is Two Page Spread",
+          "type": "boolean"
+        },
+        "legacy_fonts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Legacy Fonts",
+          "type": "array"
+        },
+        "page_number": {
+          "title": "Page Number",
+          "type": "integer"
+        },
+        "skew_degrees": {
+          "default": 0.0,
+          "title": "Skew Degrees",
+          "type": "number"
+        },
+        "text_layer_valid": {
+          "default": false,
+          "title": "Text Layer Valid",
+          "type": "boolean"
+        },
+        "watermark_tier": {
+          "$ref": "#/$defs/WatermarkTier",
+          "default": "none"
+        },
+        "width_px": {
+          "default": 0,
+          "title": "Width Px",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "page_number"
+      ],
+      "title": "PageInfo",
+      "type": "object"
+    },
+    "PageStatus": {
+      "enum": [
+        "pending",
+        "running",
+        "done",
+        "failed",
+        "skipped"
+      ],
+      "title": "PageStatus",
+      "type": "string"
+    },
+    "Passage": {
+      "description": "Shared passage/stem for multiple questions (JEE/UPSC).",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "blank": "#/$defs/BlankNode",
+                "code": "#/$defs/CodeNode",
+                "figure": "#/$defs/FigureNode",
+                "match_columns": "#/$defs/MatchColumnsNode",
+                "math": "#/$defs/MathNode",
+                "raw_crop": "#/$defs/RawCropNode",
+                "statements": "#/$defs/StatementsNode",
+                "table": "#/$defs/TableNode",
+                "text": "#/$defs/TextNode"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextNode"
+              },
+              {
+                "$ref": "#/$defs/MathNode"
+              },
+              {
+                "$ref": "#/$defs/TableNode"
+              },
+              {
+                "$ref": "#/$defs/FigureNode"
+              },
+              {
+                "$ref": "#/$defs/StatementsNode"
+              },
+              {
+                "$ref": "#/$defs/MatchColumnsNode"
+              },
+              {
+                "$ref": "#/$defs/CodeNode"
+              },
+              {
+                "$ref": "#/$defs/BlankNode"
+              },
+              {
+                "$ref": "#/$defs/RawCropNode"
+              }
+            ]
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "question_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Question Refs",
+          "type": "array"
+        },
+        "text_en": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Text En",
+          "type": "array"
+        },
+        "text_hi": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Text Hi",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Passage",
+      "type": "object"
+    },
+    "Provenance": {
+      "description": "Origin of a question or piece of content.",
+      "enum": [
+        "extracted",
+        "bank",
+        "repaired",
+        "manual"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "Question": {
+      "description": "A single exam question with universal content nodes, sub-parts, and compat layer.",
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnswerSpec"
+            },
+            {
+              "$ref": "#/$defs/Answer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/Question"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "choice_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Choice Group"
+        },
+        "confidence": {
+          "default": 1.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "figure_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Figure Refs",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/QuestionKind",
+          "default": "mcq1"
+        },
+        "marks": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Marks"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Marks"
+        },
+        "number": {
+          "title": "Number",
+          "type": "integer"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/Option"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "original_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Number"
+        },
+        "parent_question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Question"
+        },
+        "passage_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Passage Ref"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "default": "extracted"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "sequence_index": {
+          "default": 0,
+          "title": "Sequence Index",
+          "type": "integer"
+        },
+        "solution": {
+          "anyOf": [
+            {
+              "items": {
+                "discriminator": {
+                  "mapping": {
+                    "blank": "#/$defs/BlankNode",
+                    "code": "#/$defs/CodeNode",
+                    "figure": "#/$defs/FigureNode",
+                    "match_columns": "#/$defs/MatchColumnsNode",
+                    "math": "#/$defs/MathNode",
+                    "raw_crop": "#/$defs/RawCropNode",
+                    "statements": "#/$defs/StatementsNode",
+                    "table": "#/$defs/TableNode",
+                    "text": "#/$defs/TextNode"
+                  },
+                  "propertyName": "kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/TextNode"
+                  },
+                  {
+                    "$ref": "#/$defs/MathNode"
+                  },
+                  {
+                    "$ref": "#/$defs/TableNode"
+                  },
+                  {
+                    "$ref": "#/$defs/FigureNode"
+                  },
+                  {
+                    "$ref": "#/$defs/StatementsNode"
+                  },
+                  {
+                    "$ref": "#/$defs/MatchColumnsNode"
+                  },
+                  {
+                    "$ref": "#/$defs/CodeNode"
+                  },
+                  {
+                    "$ref": "#/$defs/BlankNode"
+                  },
+                  {
+                    "$ref": "#/$defs/RawCropNode"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Solution"
+        },
+        "source_pages": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Source Pages",
+          "type": "array"
+        },
+        "stem": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "blank": "#/$defs/BlankNode",
+                "code": "#/$defs/CodeNode",
+                "figure": "#/$defs/FigureNode",
+                "match_columns": "#/$defs/MatchColumnsNode",
+                "math": "#/$defs/MathNode",
+                "raw_crop": "#/$defs/RawCropNode",
+                "statements": "#/$defs/StatementsNode",
+                "table": "#/$defs/TableNode",
+                "text": "#/$defs/TextNode"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextNode"
+              },
+              {
+                "$ref": "#/$defs/MathNode"
+              },
+              {
+                "$ref": "#/$defs/TableNode"
+              },
+              {
+                "$ref": "#/$defs/FigureNode"
+              },
+              {
+                "$ref": "#/$defs/StatementsNode"
+              },
+              {
+                "$ref": "#/$defs/MatchColumnsNode"
+              },
+              {
+                "$ref": "#/$defs/CodeNode"
+              },
+              {
+                "$ref": "#/$defs/BlankNode"
+              },
+              {
+                "$ref": "#/$defs/RawCropNode"
+              }
+            ]
+          },
+          "title": "Stem",
+          "type": "array"
+        },
+        "stem_en": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Stem En",
+          "type": "array"
+        },
+        "stem_hi": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Stem Hi",
+          "type": "array"
+        },
+        "stem_text_en": {
+          "default": "",
+          "title": "Stem Text En",
+          "type": "string"
+        },
+        "stem_text_hi": {
+          "default": "",
+          "title": "Stem Text Hi",
+          "type": "string"
+        },
+        "sub_question_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sub Question Refs",
+          "type": "array"
+        },
+        "table_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Table Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "number"
+      ],
+      "title": "Question",
+      "type": "object"
+    },
+    "QuestionKind": {
+      "enum": [
+        "mcq1",
+        "mcqn",
+        "numeric",
+        "match",
+        "assertion",
+        "passage",
+        "integer",
+        "mcq1",
+        "mcqn",
+        "numeric",
+        "assertion",
+        "statement_based",
+        "passage",
+        "fill_blank",
+        "true_false",
+        "short_answer",
+        "long_answer",
+        "other"
+      ],
+      "title": "QuestionKind",
+      "type": "string"
+    },
+    "RawCropNode": {
+      "properties": {
+        "figure_ref": {
+          "default": "",
+          "title": "Figure Ref",
+          "type": "string"
+        },
+        "kind": {
+          "const": "raw_crop",
+          "default": "raw_crop",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "title": "RawCropNode",
+      "type": "object"
+    },
+    "StatementsNode": {
+      "properties": {
+        "items": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "kind": {
+          "const": "statements",
+          "default": "statements",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "StatementsNode",
+      "type": "object"
+    },
+    "Table": {
+      "description": "A recognized table (e.g. match-the-column).",
+      "properties": {
+        "bbox": {
+          "$ref": "#/$defs/BBox"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "question_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question Ref"
+        },
+        "rows": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/Cell"
+            },
+            "type": "array"
+          },
+          "title": "Rows",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/EngineSource"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/BlockStatus",
+          "default": "trusted"
+        }
+      },
+      "required": [
+        "id",
+        "page",
+        "bbox"
+      ],
+      "title": "Table",
+      "type": "object"
+    },
+    "TableNode": {
+      "properties": {
+        "header_rows": {
+          "default": 0,
+          "title": "Header Rows",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "table",
+          "default": "table",
+          "title": "Kind",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/Cell"
+            },
+            "type": "array"
+          },
+          "title": "Rows",
+          "type": "array"
+        },
+        "spans": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Spans",
+          "type": "array"
+        }
+      },
+      "title": "TableNode",
+      "type": "object"
+    },
+    "TextNode": {
+      "properties": {
+        "kind": {
+          "const": "text",
+          "default": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "style": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Style"
+        },
+        "texts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Texts",
+          "type": "object"
+        }
+      },
+      "title": "TextNode",
+      "type": "object"
+    },
+    "WatermarkTier": {
+      "description": "Watermark severity \u2014 drives the cleaning strategy.",
+      "enum": [
+        "none",
+        "text_layer",
+        "transparent",
+        "semi_opaque",
+        "opaque",
+        "baked"
+      ],
+      "title": "WatermarkTier",
+      "type": "string"
+    }
+  },
+  "description": "Root document model \u2014 universal representation of an exam paper.",
+  "properties": {
+    "blocks": {
+      "items": {
+        "$ref": "#/$defs/Block"
+      },
+      "title": "Blocks",
+      "type": "array"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    },
+    "figures": {
+      "items": {
+        "$ref": "#/$defs/Figure"
+      },
+      "title": "Figures",
+      "type": "array"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/Issue"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "languages": {
+      "items": {
+        "$ref": "#/$defs/LanguageInfo"
+      },
+      "title": "Languages",
+      "type": "array"
+    },
+    "last_stage": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Stage"
+    },
+    "metadata": {
+      "$ref": "#/$defs/ExamMetadata"
+    },
+    "page_statuses": {
+      "additionalProperties": {
+        "$ref": "#/$defs/PageStatus"
+      },
+      "title": "Page Statuses",
+      "type": "object"
+    },
+    "pages": {
+      "items": {
+        "$ref": "#/$defs/PageInfo"
+      },
+      "title": "Pages",
+      "type": "array"
+    },
+    "parts": {
+      "items": {
+        "$ref": "#/$defs/DocumentPart"
+      },
+      "title": "Parts",
+      "type": "array"
+    },
+    "passages": {
+      "items": {
+        "$ref": "#/$defs/Passage"
+      },
+      "title": "Passages",
+      "type": "array"
+    },
+    "questions": {
+      "items": {
+        "$ref": "#/$defs/Question"
+      },
+      "title": "Questions",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "source_hash": {
+      "default": "",
+      "title": "Source Hash",
+      "type": "string"
+    },
+    "source_path": {
+      "title": "Source Path",
+      "type": "string"
+    },
+    "tables": {
+      "items": {
+        "$ref": "#/$defs/Table"
+      },
+      "title": "Tables",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source_path"
+  ],
+  "title": "ExamDocument",
+  "type": "object"
+}

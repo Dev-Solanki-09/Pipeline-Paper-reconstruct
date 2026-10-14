@@ -1,0 +1,17 @@
+# UPSC Civil Services (Prelims) General Studies Profile
+id: upsc_prelims
+name: UPSC Civil Services (Prelims) General Studies
+profile_version: "2.0.0"
+maturity: experimental
+extends:
+  - generic_bilingual
+
+expected_kinds:
+  - mcq1
+  - statement_based
+  - match
+
+marking:
+  positive: 2.0
+  negative: -0.66
+  partial: false

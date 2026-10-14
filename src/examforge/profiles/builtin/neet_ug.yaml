@@ -1,0 +1,95 @@
+# NEET (UG) Bilingual 50/50 Dual-Column Profile
+# Verified against official NTA NEET question papers.
+
+id: neet_ug
+name: NEET (UG) National Eligibility cum Entrance Test
+profile_version: "2.0.0"
+maturity: verified
+extends:
+  - generic_bilingual
+
+languages:
+  - code: en
+    script: Latn
+    direction: ltr
+  - code: hi
+    script: Deva
+    direction: ltr
+
+language_layout: parallel_columns
+
+layout:
+  columns: 2
+  spans_allowed: true
+  reading_order: parallel
+  orientation_policy: portrait
+
+numbering:
+  patterns:
+    - '^\s*(\d{1,3})\s*[.):]'
+    - '^\s*Q\.?\s*(\d{1,3})\s*[.):]?'
+    - '^\s*\((\d{1,3})\)\s*'
+  sections:
+    - 'PART\s*[-–:]?\s*[0-9IVX]+'
+    - 'SECTION\s*[-–:]?\s*[A-Za-z0-9()]+'
+    - 'PHYSICS'
+    - 'CHEMISTRY'
+    - 'BOTANY'
+    - 'ZOOLOGY'
+    - 'BIOLOGY'
+  reset_policy: continuous
+  nesting_labels:
+    - "(a)"
+    - "(b)"
+    - "(c)"
+    - "(d)"
+
+options:
+  label_schemes:
+    - "(1)"
+    - "(2)"
+    - "(3)"
+    - "(4)"
+  count_min: 4
+  count_max: 4
+  count_typical: 4
+  layout_preference: vertical
+  image_option_policy: allow
+
+furniture_branding:
+  headers:
+    - 'NEET\s*\(?UG\)?'
+    - 'National Eligibility.*Entrance Test'
+  footers:
+    - 'Page\s*\d+\s*(?:of|/)\s*\d+'
+  branding:
+    - 'ALLEN|Aakash|Resonance|FIITJEE|Motion\s*(?:Edu|Classes|IIT|NEET)'
+  watermark:
+    enabled: true
+    mode: subtract
+    patterns: []
+
+expected_kinds:
+  - mcq1
+  - assertion_reason
+  - match
+  - statement_based
+
+marking:
+  positive: 4.0
+  negative: -1.0
+  partial: false
+
+output:
+  template: exam.html.j2
+  layout_mode: bilingual_columns
+  exporters:
+    - html
+    - json
+  include_answers: false
+
+requires:
+  - paddle_vl
+  - hindi_normalizer
+
+compute: standard

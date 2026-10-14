@@ -11,6 +11,20 @@ from examforge.ir.schema import ExamDocument, ExamMetadata
 from examforge.spec import Spec
 
 
+@pytest.fixture(autouse=True)
+def block_network_sockets(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch):
+    """Enforce Operating Rule 7: Zero network in tests unless explicitly marked @pytest.mark.network."""
+    if "network" in request.keywords:
+        return
+
+    import socket
+
+    def _blocked(*args, **kwargs):
+        raise RuntimeError("Network socket access is blocked during tests per Operating Rule 7.")
+
+    monkeypatch.setattr(socket, "socket", _blocked)
+
+
 @pytest.fixture
 def tmp_runs(tmp_path: Path) -> Path:
     """Temporary runs directory."""
@@ -51,8 +65,9 @@ def sample_pdf_path() -> Path | None:
     Returns None if the file is not present (tests that need it
     should skip with pytest.mark.skipif).
     """
+    repo_root = Path(__file__).parent.parent
     candidates = [
-        Path(r"c:\Users\D.Solanki\pipeline\JEE ADV  MT # 4 NURTURE SANKALP -I BATCH PAPER D-27-07-2025.pdf"),
+        repo_root / "sample_papers" / "jee_adv_2025_sample.pdf",
     ]
     for p in candidates:
         if p.exists():

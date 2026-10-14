@@ -1,0 +1,8 @@
+# Standard compute tier (standard multi-core CPU workstation)
+tier: standard
+dpi: 150
+workers: auto
+max_image_pixels: 60000000
+second_ocr: on_low_confidence
+paddle_device: cpu
+bank_embeddings: false

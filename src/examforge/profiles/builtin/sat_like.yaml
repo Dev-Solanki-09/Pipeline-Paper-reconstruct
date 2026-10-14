@@ -1,0 +1,21 @@
+# SAT-like Aptitude Examination Profile
+id: sat_like
+name: SAT-style Aptitude Examination
+profile_version: "2.0.0"
+maturity: experimental
+extends:
+  - base
+
+options:
+  label_schemes:
+    - "(A)"
+    - "(B)"
+    - "(C)"
+    - "(D)"
+  count_min: 4
+  count_max: 4
+  count_typical: 4
+
+expected_kinds:
+  - mcq1
+  - passage

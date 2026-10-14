@@ -203,3 +203,32 @@ class TestS4StructureStage:
             assert len(q.source_pages) > 0
             assert q.number > 0
             assert len(q.stem_text_en) > 0
+
+    def test_rollback_flag_off_restores_v1_logic(self, tmp_path):
+        from examforge.config import ExamForgeConfig
+        cfg = ExamForgeConfig()
+        cfg.flags["layout_v2"] = False
+
+        blocks = [
+            Block(id="b1", page=1, bbox=BBox(x1=50, y1=50, x2=550, y2=100), text="1. Question one?\n(A) yes\n(B) no"),
+            Block(id="b2", page=1, bbox=BBox(x1=50, y1=120, x2=550, y2=180), text="2. Question two?\n(A) true\n(B) false"),
+        ]
+        doc = ExamDocument(
+            schema_version=2,
+            source_path="test.pdf",
+            metadata=ExamMetadata(title="Test Rollback"),
+            pages=[PageInfo(page_number=1, classification=PageClassification.QUESTIONS, width_px=600, height_px=800)],
+            blocks=blocks,
+        )
+        ctx = StageContext(
+            document=doc,
+            config=cfg,
+            spec=None,
+            stage_dir=tmp_path / "s4",
+            run_dir=tmp_path,
+        )
+        s4 = S4Structure()
+        res = s4.run(ctx)
+        assert len(res.document.questions) == 2
+        assert res.document.questions[0].number == 1
+        assert res.document.questions[1].number == 2

@@ -20,6 +20,8 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+from examforge.profiles.compute import ComputeTierConfig, resolve_compute_tier
+
 class EngineConfig(BaseSettings):
     """Configuration for an OCR / layout engine."""
 
@@ -91,10 +93,50 @@ class ExamForgeConfig(BaseSettings):
     agent: AgentConfig = Field(default_factory=AgentConfig)
     paths: PathConfig = Field(default_factory=PathConfig)
 
+    # Feature flags (all v2 feature flags active for release)
+    flags: dict[str, bool] = Field(default_factory=lambda: {
+        "verifiers_v2": True,
+        "layout_v2": True,
+        "figures_v2": True,
+        "clean_v2": True,
+        "lang_v2": True,
+        "answers": True,
+        "s7_repair": True,
+        "bank": True,
+        "autoprofile": True,
+        "lessons": True,
+        "template_v2": True,
+        "exporters": True,
+    })
+
     # Pipeline behavior
     fail_policy: str = "fail_page"  # "fail_fast", "fail_page", "fail_warn"
+    checkpoint_tier: str = "major"  # "all", "major", "none"
     max_pages: int | None = None  # Process only first N pages (for debugging)
     debug: bool = False  # Include provenance attributes in HTML output
+    bank_path: Path = Field(default_factory=lambda: Path("data/bank/bank.db"))
+    profile_cache_path: Path = Field(
+        default_factory=lambda: Path("data/profiles/profile_cache.sqlite")
+    )
+    lessons_path: Path = Field(
+        default_factory=lambda: Path("data/lessons/lessons.jsonl")
+    )
+    proposals_dir: Path = Field(default_factory=lambda: Path("proposals"))
+
+    # Unified compute tier configuration (Phase O6.2)
+    compute_tier: str = "standard"  # "lite", "standard", "gpu"
+
+    def get_compute_config(self) -> ComputeTierConfig:
+        """Resolve unified compute tier configuration."""
+        return resolve_compute_tier(self.compute_tier)
+
+    def flag(self, name: str, default: bool = False) -> bool:
+        """Check whether a feature flag is enabled."""
+        return self.flags.get(name, default)
+
+    def set_flag(self, name: str, value: bool) -> None:
+        """Set a feature flag value."""
+        self.flags[name] = value
 
     @classmethod
     def load(

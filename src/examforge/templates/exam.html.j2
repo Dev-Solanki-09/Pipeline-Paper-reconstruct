@@ -1,282 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="ExamForge v0.1.0">
-    <meta name="examforge:spec-hash" content="{{ spec_hash }}">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="generator" content="ExamForge v0.1.0"/>
+    <meta name="examforge:spec-hash" content="{{ spec_hash }}"/>
     {% if metadata.exam_name %}
-    <meta name="examforge:exam" content="{{ metadata.exam_name }}">
+    <meta name="examforge:exam" content="{{ metadata.exam_name }}"/>
     {% endif %}
     {% if metadata.year %}
-    <meta name="examforge:year" content="{{ metadata.year }}">
+    <meta name="examforge:year" content="{{ metadata.year }}"/>
     {% endif %}
-    <title>{{ metadata.exam_name or "Exam" }}{% if metadata.year %} {{ metadata.year }}{% endif %}{% if metadata.subject %} — {{ metadata.subject }}{% endif %}</title>
-    <style>
-        /* === ExamForge Print-Ready Stylesheet === */
+    <title>{{ metadata.exam_name or "Question Paper" }}{% if metadata.year %} ({{ metadata.year }}){% endif %}{% if metadata.subject %} — {{ metadata.subject }}{% endif %}</title>
 
-        /* Suppress browser-injected headers/footers */
-        @page {
-            margin: 0;
-            size: A4;
+    <!-- MathJax 3 for high-fidelity TeX-SVG rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript"></script>
+
+    <style>
+        /* === Authentic Real NEET Dual-Column Bilingual Continuous Layout === */
+        * {
+            box-sizing: border-box;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            margin: auto;
+            padding: 18px 24px;
+            background: #ffffff;
+            font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 21px;
+            color: #111;
+            max-width: 1400px;
+            line-height: 1.5;
+        }
+        [lang="hi"] {
+            font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+            line-height: 1.6;
         }
 
-        /* Reset */
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
+        /* 50/50 Dual-Column Bilingual Continuous Question Flow — Zero artificial borders */
+        .questions-container {
+            width: 100%;
+        }
+        .question-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 34px;
+            gap: 4%;
+            width: 100%;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            border: none;
             padding: 0;
         }
-
-        /* Base */
-        body {
-            font-family: 'Noto Sans', 'Noto Sans Devanagari', 'Segoe UI', system-ui, sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
-            color: #1a1a1a;
-            padding: 12mm 15mm;
-            max-width: 210mm;
-            margin: 0 auto;
+        .col, .col-50 {
+            width: 48%;
+            max-width: 48%;
+            flex: 0 0 48%;
+            min-width: 0;
+            line-height: 1.55;
+            padding: 0;
+            border: none;
+        }
+        .col-en {
+            /* Left column: English */
+            border: none;
+        }
+        .col-hi {
+            /* Right column: Hindi */
+            border: none;
+        }
+        .q-layout {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            min-width: 0;
+            align-items: flex-start;
+        }
+        .q-serial {
+            flex: 0 0 38px;
+            font-weight: bold;
+            font-size: 1.05em;
+            line-height: 1.45;
+            color: #111;
+            text-align: right;
+            padding-right: 4px;
+        }
+        .q-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .q-text {
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.45;
+            min-width: 0;
         }
 
-        /* Hindi text needs extra line-height for matras */
-        [lang="hi"] {
-            font-family: 'Noto Sans Devanagari', 'Mangal', 'Aparajita', sans-serif;
-            line-height: 1.8;
+        /* Tightly Coupled Options: Always One Option Per Line (1, 2, 3, 4) */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 6px;
+            width: 100%;
+        }
+        .options-list > div {
+            min-width: 0;
+            width: 100%;
+            word-wrap: break-word;
+            line-height: 1.5;
         }
 
-        /* === Question Layout === */
-
-        .question {
-            break-inside: avoid;
-            margin-bottom: 1.2em;
-            padding-bottom: 0.8em;
-            border-bottom: 1px solid #e5e5e5;
+        /* Canonical Diagram Embedding & Scale Taxonomy */
+        .diagram-frame,
+        .q-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 10px 0;
         }
-
-        .question:last-child {
-            border-bottom: none;
+        .q-diagram,
+        .q-image-container img {
+            display: block;
+            height: auto;
+            max-width: 100%;
+            object-fit: contain;
+            image-rendering: -webkit-optimize-contrast;
+            background: transparent;
         }
+        .img-inline { max-height: 38px; display: inline-block; vertical-align: middle; }
+        .img-opt    { max-height: 55px; max-width: 220px; display: inline-block; vertical-align: middle; }
+        .img-sm     { max-height: 110px; max-width: 240px; }
+        .img-md     { max-height: 180px; max-width: 280px; }
+        .img-wide   { max-height: 165px; max-width: 340px; }
+        .img-grid   { max-height: 260px; max-width: 350px; }
+        .img-lg     { max-height: 290px; max-width: 340px; }
+        .img-match  { max-height: 440px; max-width: 370px; }
+        .img-xl     { max-height: 480px; max-width: 380px; }
 
-        /* Bilingual 50/50 grid */
-        .bilingual-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5em;
+        mjx-container {
+            max-width: 100%;
+            overflow: visible !important;
         }
-
-        .lang-en, .lang-hi {
-            padding: 0.3em 0;
-        }
-
-        .lang-hi {
-            border-left: 2px solid #e0e0e0;
-            padding-left: 1em;
-        }
-
-        /* Question number */
-        .q-number {
-            font-weight: 700;
-            margin-right: 0.4em;
-            color: #333;
-        }
-
-        /* Stem text */
-        .q-stem {
-            margin-bottom: 0.5em;
-        }
-
-        /* Options */
-        .q-options {
-            margin-top: 0.4em;
-            padding-left: 0;
-            list-style: none;
-        }
-
-        .q-option {
-            margin-bottom: 0.25em;
-            padding-left: 1.8em;
-            text-indent: -1.8em;
-        }
-
-        .option-label {
-            font-weight: 600;
-            margin-right: 0.3em;
-            display: inline-block;
-            min-width: 1.5em;
-        }
-
-        /* === Figures === */
-
-        .q-figure {
-            margin: 0.5em 0;
-            text-align: center;
-            break-inside: avoid;
-        }
-
-        .q-figure img {
+        mjx-container svg {
             max-width: 100%;
             height: auto;
         }
+        .q-text mjx-container {
+            font-size: 1.1em !important;
+        }
 
-        /* === Section Headers === */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        td {
+            padding: 4px;
+            vertical-align: top;
+        }
 
-        .section-header {
-            font-size: 1.15em;
-            font-weight: 700;
+        /* Section divider (if any section in document) */
+        .section-divider {
             text-align: center;
-            margin: 1.5em 0 0.8em;
-            padding-bottom: 0.3em;
-            border-bottom: 2px solid #333;
-            break-after: avoid;
-        }
-
-        /* === Badges & TOC === */
-
-        .q-header {
-            display: flex;
-            align-items: center;
-            gap: 0.6em;
-            margin-bottom: 0.4em;
-        }
-
-        .q-badge {
-            font-size: 0.72em;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.05em;
+            padding: 6px 0;
+            margin: 16px 0 20px 0;
             text-transform: uppercase;
-            padding: 0.15em 0.5em;
-            background: #eef2f7;
-            color: #2b4c7e;
-            border-radius: 3px;
-            letter-spacing: 0.03em;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
         }
 
-        .exam-toc {
-            margin-bottom: 1.5em;
-            padding: 0.8em 1em;
-            background: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-        }
-
-        .exam-toc h3 {
-            font-size: 0.95em;
-            margin-bottom: 0.5em;
-            color: #334155;
-        }
-
-        .toc-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35em;
-        }
-
-        .toc-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 1.8em;
-            height: 1.8em;
-            padding: 0 0.4em;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 3px;
-            color: #1e293b;
-            text-decoration: none;
-            font-size: 0.85em;
-            font-weight: 600;
-            transition: all 0.15s ease;
-        }
-
-        .toc-link:hover {
-            background: #2563eb;
-            color: #ffffff;
-            border-color: #2563eb;
-        }
-
-        .opt-text {
-            display: inline;
-        }
-
-        .questions-section h2 {
-            font-size: 1.3em;
-            margin: 1.2em 0 0.8em;
-            color: #0f172a;
-            border-bottom: 2px solid #0f172a;
-            padding-bottom: 0.2em;
-        }
-
-        /* === Page Summary (M1 skeleton) === */
-
+        /* Page summary (only shown in fallback when no questions extracted yet) */
         .page-summary {
-            margin-bottom: 2em;
+            margin: 1.5em 0;
             padding: 1em;
             background: #f8f8f8;
             border: 1px solid #ddd;
-            border-radius: 4px;
         }
-
         .page-summary h2 {
             font-size: 1.1em;
             margin-bottom: 0.5em;
-            color: #555;
         }
-
         .page-summary table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
         }
-
         .page-summary th, .page-summary td {
-            padding: 0.3em 0.6em;
+            padding: 0.3em 0.5em;
             text-align: left;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid #ddd;
         }
 
-        .page-summary th {
-            font-weight: 600;
-            color: #666;
-        }
-
-        /* === Debug Provenance (hidden in production) === */
-        {% if debug %}
-        .provenance {
-            font-size: 0.7em;
-            color: #999;
-            font-style: italic;
-        }
-        {% else %}
-        .provenance { display: none; }
-        {% endif %}
-
-        /* === Print Adjustments === */
+        /* Unconstrained Native Browser Printing System (Ctrl+P) */
         @media print {
             body {
-                padding: 0 10mm;
+                padding: 0;
+                background: transparent;
+                max-width: 100%;
+                font-size: 17px;
             }
-            .page-summary {
-                break-after: always;
+            .question-row {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                margin-bottom: 22px;
+                border: none;
+                padding: 0;
+            }
+            .diagram-frame, .q-image-container {
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- M1 Skeleton: Page Summary -->
+    {% if questions %}
+    <div class="questions-container">
+        {% for question in questions %}
+        {% if question.section and (loop.first or question.section != loop.previtem.section) %}
+        <div class="section-divider">{{ question.section }}</div>
+        {% endif %}
+
+        <div class="question-row" id="q{{ question.number }}">
+            <!-- Left Column: English (50%) -->
+            <div class="col col-50 col-en" lang="en">
+                <div class="q-layout">
+                    <div class="q-serial">{{ question.number }}.</div>
+                    <div class="q-content">
+                        <div class="q-text">
+                            {% if question.stem_text_en %}{{ question.stem_text_en | safe }}{% else %}{% for block in question.stem_en %}{{ block.text | safe }}{% endfor %}{% endif %}
+                        </div>
+
+                        {% for fig_id in question.figure_refs %}
+                        {% set fig = figures | selectattr("id", "equalto", fig_id) | first %}
+                        {% if fig and fig.crop_path and not fig.option_ref %}
+                        <div class="diagram-frame">
+                            <img src="{{ fig.crop_path | b64_image }}" alt="Figure for Q{{ question.number }}" class="q-diagram {{ fig.scale_class or 'img-md' }}">
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if question.options %}
+                        <div class="options-list">
+                            {% for option in question.options %}
+                            <div>
+                                {% if option.label.startswith('(') %}{{ option.label }}{% else %}({{ option.label }}){% endif %} {% if option.text_str_en %}{{ option.text_str_en | safe }}{% else %}{% for block in option.text_en %}{{ block.text | safe }}{% endfor %}{% endif %}
+                                {% for fig_id in question.figure_refs %}
+                                {% set opt_fig = figures | selectattr("id", "equalto", fig_id) | first %}
+                                {% if opt_fig and opt_fig.crop_path and (opt_fig.option_ref == option.label or opt_fig.option_ref == '(' ~ option.label ~ ')') %}
+                                <div class="diagram-frame" style="margin: 4px 0;">
+                                    <img src="{{ opt_fig.crop_path | b64_image }}" alt="Option {{ option.label }}" class="q-diagram {{ opt_fig.scale_class or 'img-opt' }}">
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Hindi (50%) -->
+            <div class="col col-50 col-hi" lang="hi">
+                <div class="q-layout">
+                    <div class="q-serial">{{ question.number }}.</div>
+                    <div class="q-content">
+                        <div class="q-text">
+                            {% if question.stem_text_hi %}{{ question.stem_text_hi | safe }}{% elif question.stem_hi %}{% for block in question.stem_hi %}{{ block.text | safe }}{% endfor %}{% else %}{% if question.stem_text_en %}{{ question.stem_text_en | safe }}{% else %}{% for block in question.stem_en %}{{ block.text | safe }}{% endfor %}{% endif %}{% endif %}
+                        </div>
+
+                        {% for fig_id in question.figure_refs %}
+                        {% set fig = figures | selectattr("id", "equalto", fig_id) | first %}
+                        {% if fig and fig.crop_path and not fig.option_ref %}
+                        <div class="diagram-frame">
+                            <img src="{{ fig.crop_path | b64_image }}" alt="Figure for Q{{ question.number }}" class="q-diagram {{ fig.scale_class or 'img-md' }}">
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if question.options %}
+                        <div class="options-list">
+                            {% for option in question.options %}
+                            <div>
+                                {% if option.label.startswith('(') %}{{ option.label }}{% else %}({{ option.label }}){% endif %} {% if option.text_str_hi %}{{ option.text_str_hi | safe }}{% elif option.text_hi %}{% for block in option.text_hi %}{{ block.text | safe }}{% endfor %}{% else %}{% if option.text_str_en %}{{ option.text_str_en | safe }}{% else %}{% for block in option.text_en %}{{ block.text | safe }}{% endfor %}{% endif %}{% endif %}
+                                {% for fig_id in question.figure_refs %}
+                                {% set opt_fig = figures | selectattr("id", "equalto", fig_id) | first %}
+                                {% if opt_fig and opt_fig.crop_path and (opt_fig.option_ref == option.label or opt_fig.option_ref == '(' ~ option.label ~ ')') %}
+                                <div class="diagram-frame" style="margin: 4px 0;">
+                                    <img src="{{ opt_fig.crop_path | b64_image }}" alt="Option {{ option.label }}" class="q-diagram {{ opt_fig.scale_class or 'img-opt' }}">
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not questions %}
+    <!-- Document summary when no questions extracted yet -->
     <div class="page-summary">
         <h2>ExamForge — Document Summary</h2>
         <p>
             <strong>Source:</strong> {{ document.source_path | e }}<br>
-            {% if metadata.exam_name %}
-            <strong>Exam:</strong> {{ metadata.exam_name }}
-            {% if metadata.year %} ({{ metadata.year }}){% endif %}
-            {% if metadata.series_code %} — Series {{ metadata.series_code }}{% endif %}
-            <br>
-            {% endif %}
-            {% if metadata.subject %}
-            <strong>Subject:</strong> {{ metadata.subject }}<br>
-            {% endif %}
             <strong>Pages:</strong> {{ pages | length }}<br>
             <strong>Questions:</strong> {{ questions | length }}<br>
             <strong>Issues:</strong> {{ issues | length }}
@@ -313,147 +371,13 @@
         </table>
     </div>
 
-    {% if issues %}
-    <div class="page-summary">
-        <h2>Issues ({{ issues | length }})</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Severity</th>
-                    <th>Stage</th>
-                    <th>Page</th>
-                    <th>Message</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for issue in issues[:30] %}
-                <tr>
-                    <td>{{ issue.id }}</td>
-                    <td>{{ issue.severity.value }}</td>
-                    <td>{{ issue.stage }}</td>
-                    <td>{{ issue.page or "—" }}</td>
-                    <td>{{ issue.message | e }}</td>
-                </tr>
-                {% endfor %}
-                {% if issues | length > 30 %}
-                <tr>
-                    <td colspan="5"><em>… and {{ issues | length - 30 }} more</em></td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-
-    <!-- Rendered Questions -->
-    {% if questions %}
-    <div class="exam-toc">
-        <h3>Questions ({{ questions | length }})</h3>
-        <div class="toc-links">
-            {% for q in questions %}
-            <a href="#q{{ q.number }}" class="toc-link">{{ q.number }}</a>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="questions-section">
-        <h2>Questions</h2>
-        {% for question in questions %}
-        {% if question.section and (loop.first or question.section != loop.previtem.section) %}
-        <div class="section-header">{{ question.section }}</div>
-        {% endif %}
-        <div class="question" id="q{{ question.number }}">
-            <div class="q-header">
-                <span class="q-number"><a href="#q{{ question.number }}" style="text-decoration:none;color:inherit;">Q.{{ question.number }}</a></span>
-                <span class="q-badge">{{ question.kind.value }}</span>
-            </div>
-
-            {% if question.stem_text_hi or question.stem_hi %}
-            <div class="bilingual-grid">
-                <div class="lang-en" lang="en">
-                    <div class="q-stem">
-                        {% if question.stem_text_en %}{{ question.stem_text_en | e }}{% else %}{% for block in question.stem_en %}{{ block.text | e }}{% endfor %}{% endif %}
-                    </div>
-                    {% if question.options %}
-                    <ul class="q-options">
-                        {% for option in question.options %}
-                        <li class="q-option">
-                            <span class="option-label">({{ option.label }})</span>
-                            <span class="opt-text">{% if option.text_str_en %}{{ option.text_str_en | e }}{% else %}{% for block in option.text_en %}{{ block.text | e }}{% endfor %}{% endif %}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                </div>
-
-                <div class="lang-hi" lang="hi">
-                    <div class="q-stem">
-                        {% if question.stem_text_hi %}{{ question.stem_text_hi | e }}{% else %}{% for block in question.stem_hi %}{{ block.text | e }}{% endfor %}{% endif %}
-                    </div>
-                    {% if question.options %}
-                    <ul class="q-options">
-                        {% for option in question.options %}
-                        <li class="q-option">
-                            <span class="option-label">({{ option.label }})</span>
-                            <span class="opt-text">{% if option.text_str_hi %}{{ option.text_str_hi | e }}{% else %}{% for block in option.text_hi %}{{ block.text | e }}{% endfor %}{% endif %}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                </div>
-            </div>
-            {% else %}
-            <div class="lang-en" lang="en">
-                <div class="q-stem">
-                    {% if question.stem_text_en %}{{ question.stem_text_en | e }}{% else %}{% for block in question.stem_en %}{{ block.text | e }}{% endfor %}{% endif %}
-                </div>
-                {% if question.options %}
-                <ul class="q-options">
-                    {% for option in question.options %}
-                    <li class="q-option">
-                        <span class="option-label">({{ option.label }})</span>
-                        <span class="opt-text">{% if option.text_str_en %}{{ option.text_str_en | e }}{% else %}{% for block in option.text_en %}{{ block.text | e }}{% endfor %}{% endif %}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            {% for fig_id in question.figure_refs %}
-            {% set fig = figures | selectattr("id", "equalto", fig_id) | first %}
-            {% if fig and fig.crop_path %}
-            <div class="q-figure">
-                <img src="{{ fig.crop_path | b64_image }}"
-                     alt="Figure for Q{{ question.number }}"
-                     {% if fig.width_mm %}style="width: {{ fig.width_mm }}mm"{% endif %}>
-            </div>
-            {% endif %}
-            {% endfor %}
-
-            {% if debug %}
-            <div class="provenance">
-                Kind: {{ question.kind.value }} |
-                Pages: {{ question.source_pages }} |
-                ID: {{ question.id }}
-            </div>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if not questions %}
-    <!-- M1: No questions extracted yet — page images shown below -->
     <div class="page-summary">
         <h2>Page Previews</h2>
-        <p><em>Questions will appear here after M4 (Exam Structure) is implemented.
-        For now, showing rendered page images from intake.</em></p>
+        <p><em>Questions will appear here once extracted. Showing rendered intake page images below.</em></p>
     </div>
     {% for page in question_pages %}
     {% if page.image_path %}
-    <div class="q-figure" style="margin: 1em 0;">
+    <div class="q-image-container" style="margin: 1em 0;">
         <p style="font-size: 0.8em; color: #888;">Page {{ page.page_number }}</p>
         <img src="{{ page.image_path | b64_image }}"
              alt="Page {{ page.page_number }}"

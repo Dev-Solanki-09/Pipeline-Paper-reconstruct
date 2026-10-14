@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'unsafe-inline';"/>
+    <meta name="generator" content="ExamForge v2.0"/>
+    <meta name="examforge:spec-hash" content="{{ spec_hash }}"/>
+    {% if metadata.exam_name %}<meta name="examforge:exam" content="{{ metadata.exam_name }}"/>{% endif %}
+    {% if metadata.year %}<meta name="examforge:year" content="{{ metadata.year }}"/>{% endif %}
+    <title>{{ metadata.exam_name or "Question Paper" }}{% if metadata.year %} ({{ metadata.year }}){% endif %}</title>
+
+    <style>
+        /* === ExamForge v2 Universal Declarative Layout System === */
+        * {
+            box-sizing: border-box;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        *::-webkit-scrollbar { display: none; }
+
+        body {
+            margin: auto;
+            padding: 16px 20px;
+            background: #ffffff;
+            font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 16px;
+            color: #111827;
+            max-width: 1400px;
+            line-height: 1.5;
+        }
+
+        [lang="hi"] {
+            font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+            line-height: 1.6;
+        }
+        [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* Continuous Layout Modes */
+        .exam-container { width: 100%; }
+
+        /* Bilingual Parallel Grid: Row per question aligning columns */
+        .bilingual-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+        .question-row-bilingual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            width: 100%;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            align-items: start;
+        }
+
+        /* Monolingual Flow */
+        .monolingual-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        /* Stacked Bilingual Flow */
+        .stacked-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .question-stacked {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        /* Question Layout Internals */
+        .q-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            width: 100%;
+        }
+        .q-serial {
+            flex: 0 0 34px;
+            font-weight: 700;
+            font-size: 1.05em;
+            color: #0f172a;
+            text-align: right;
+            user-select: none;
+        }
+        .q-body {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .section-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e293b;
+            text-align: center;
+            padding: 12px 0;
+            margin: 20px 0;
+            border-bottom: 2px solid #e2e8f0;
+            letter-spacing: 0.05em;
+        }
+
+        /* Content Nodes */
+        .math-inline {
+            font-family: "KaTeX_Math", "Cambria Math", "Times New Roman", serif;
+            font-style: italic;
+            padding: 0 2px;
+        }
+        .math-display {
+            display: block;
+            text-align: center;
+            margin: 8px 0;
+            font-size: 1.1em;
+        }
+        .figure-frame {
+            margin: 8px 0;
+            text-align: center;
+        }
+        .figure-frame img {
+            max-width: 100%;
+            height: auto;
+            display: inline-block;
+        }
+        .img-inline { max-height: 40px; }
+        .img-sm { max-width: 160px; }
+        .img-md { max-width: 320px; }
+        .img-lg { max-width: 520px; }
+
+        /* Tables */
+        .table-node-frame {
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .table-node {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.95em;
+        }
+        .table-node th, .table-node td {
+            border: 1px solid #cbd5e1;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        .table-node th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        /* Match Columns Node */
+        .match-columns-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 8px 0;
+        }
+        .match-columns-table td {
+            padding: 4px 12px;
+            vertical-align: top;
+            border: none;
+        }
+
+        /* Fill in the Blank */
+        .fill-blank {
+            display: inline-block;
+            border-bottom: 1.5px solid #111;
+            min-width: 48px;
+            height: 1em;
+            margin: 0 4px;
+        }
+
+        /* Code Block */
+        pre.code-block {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        /* Options Packing Classes */
+        .options-container {
+            margin-top: 10px;
+        }
+        .opt-col-1 {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .opt-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+        }
+        .opt-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px 12px;
+        }
+        .option-item {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+        }
+        .option-label {
+            font-weight: 600;
+            color: #334155;
+            flex: 0 0 auto;
+        }
+
+        /* Answers & Solutions */
+        .answer-key-box {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: #f0fdf4;
+            border-left: 3px solid #22c55e;
+            font-size: 0.9em;
+        }
+        .solution-box {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        /* Print CSS */
+        @media print {
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+            body {
+                padding: 0;
+                max-width: 100%;
+                font-size: 11pt;
+                color: #000;
+            }
+            .question-row-bilingual, .question-stacked, .monolingual-flow > article {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            a { text-decoration: none; color: inherit; }
+        }
+    </style>
+</head>
+<body>
+
+{% macro render_node(node, lang="en") %}
+    {% if node.kind == "text" or (node.texts is defined and node.code is not defined and node.latex is not defined and node.rows is not defined) %}
+        {{ node.texts[lang] if (node.texts and lang in node.texts) else (node.texts['en'] if (node.texts and 'en' in node.texts) else (node.text or '')) | safe }}
+    {% elif node.kind == "math" or node.code is defined or node.latex is defined %}
+        {% set math_code = node.code if (node.code is defined and node.code) else (node.latex or "") %}
+        {% if node.display %}
+            <div class="math-display">\[ {{ math_code | safe }} \]</div>
+        {% else %}
+            <span class="math-inline">\( {{ math_code | safe }} \)</span>
+        {% endif %}
+    {% elif node.kind == "table" or node.rows is defined %}
+        <div class="table-node-frame">
+            <table class="table-node">
+                <tbody>
+                    {% for row in node.rows %}
+                    <tr>
+                        {% for cell in row %}
+                            {% if loop.first and (node.header_rows or 0) > 0 %}
+                                <th>{{ (cell.text if cell.text is defined else cell) | safe }}</th>
+                            {% else %}
+                                <td>{{ (cell.text if cell.text is defined else cell) | safe }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif node.kind == "figure" or node.figure_ref is defined or node.crop_path is defined %}
+        {% set fig_src = (node.figure_ref if (node.figure_ref is defined and node.figure_ref) else node.crop_path) or "" %}
+        <div class="figure-frame">
+            <img src="{{ fig_src | b64_image }}" alt="Figure" class="q-diagram {{ node.scale_class or 'img-md' }}"/>
+        </div>
+    {% elif node.kind == "match_columns" or node.left is defined or node.left_items is defined %}
+        {% set l_items = node.left if node.left is defined else (node.left_items or []) %}
+        {% set r_items = node.right if node.right is defined else (node.right_items or []) %}
+        <table class="match-columns-table">
+            <tbody>
+                {% for left, right in l_items | zip(r_items) %}
+                <tr>
+                    <td>
+                        {% if left is mapping %}
+                            {% for k, v in left.items() %}<strong>{{ k }}.</strong> {{ v | safe }}{% endfor %}
+                        {% elif left and left.label is defined %}
+                            <strong>{{ left.label }}.</strong> {{ left.text | safe }}
+                        {% else %}
+                            {{ (left or "") | safe }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if right is mapping %}
+                            {% for k, v in right.items() %}<strong>{{ k }}.</strong> {{ v | safe }}{% endfor %}
+                        {% elif right and right.label is defined %}
+                            <strong>{{ right.label }}.</strong> {{ right.text | safe }}
+                        {% else %}
+                            {{ (right or "") | safe }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif node.kind == "statements" or node.items is defined %}
+        <ol type="I" style="margin: 6px 0; padding-left: 24px;">
+            {% for item in (node.items or []) %}
+                {% if item is mapping %}
+                    {% for k, v in item.items() %}<li><strong>({{ k }})</strong> {{ v | safe }}</li>{% endfor %}
+                {% else %}
+                    <li>{{ item | safe }}</li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    {% elif node.kind == "code" or node.text is defined %}
+        {% set code_val = node.text if node.text is defined else (node.code or "") %}
+        <pre class="code-block"><code>{{ code_val | e }}</code></pre>
+    {% elif node.kind == "blank" %}
+        <span class="fill-blank"></span>
+    {% elif node.kind == "raw_crop" %}
+        {% set crop_src = (node.figure_ref if (node.figure_ref is defined and node.figure_ref) else node.crop_path) or "" %}
+        <div class="figure-frame"><img src="{{ crop_src | b64_image }}" class="raw-crop" alt="Raw crop"/></div>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_stem(q, lang="en") %}
+    {% if q.stem %}
+        {% for n in q.stem %}{{ render_node(n, lang) }}{% endfor %}
+    {% else %}
+        {% if lang == "hi" and q.stem_text_hi %}
+            {{ q.stem_text_hi | safe }}
+        {% else %}
+            {{ (q.stem_text_en or q.stem_text_hi or "") | safe }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
+{% macro render_options(q, lang="en") %}
+    {% if q.options %}
+    <div class="options-container {{ (q.options or q) | option_packing_class }}">
+        {% for opt in q.options %}
+        <div class="option-item">
+            <span class="option-label">{% if opt.label.startswith('(') %}{{ opt.label }}{% else %}({{ opt.label }}){% endif %}</span>
+            <span class="option-text">
+                {% if lang == "hi" and opt.text_str_hi %}
+                    {{ opt.text_str_hi | safe }}
+                {% else %}
+                    {{ (opt.text_str_en or opt.text_str_hi or "") | safe }}
+                {% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endmacro %}
+
+<main class="exam-container">
+    {% set layout_mode = (profile.output.layout_mode if (profile and profile.output) else (profile.language_layout if profile else 'bilingual_parallel')) %}
+
+    {% if layout_mode == "monolingual" or (profile and profile.languages | length == 1) %}
+    <!-- Monolingual Layout -->
+    <div class="monolingual-flow">
+        {% for q in questions %}
+        <article class="q-wrapper" id="q-{{ q.number }}">
+            <div class="q-serial">{{ q.number }}.</div>
+            <div class="q-body">
+                <div class="q-stem">{{ render_stem(q, "en") }}</div>
+                {{ render_options(q, "en") }}
+                {% if q.answer %}
+                <div class="answer-key-box"><strong>Answer:</strong> {{ q.answer.value }}</div>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% elif layout_mode == "stacked" %}
+    <!-- Stacked Bilingual Layout -->
+    <div class="stacked-flow">
+        {% for q in questions %}
+        <article class="question-stacked" id="q-{{ q.number }}">
+            <div class="q-wrapper" lang="en">
+                <div class="q-serial">{{ q.number }}.</div>
+                <div class="q-body">
+                    <div class="q-stem">{{ render_stem(q, "en") }}</div>
+                    {{ render_options(q, "en") }}
+                </div>
+            </div>
+            <div class="q-wrapper" lang="hi" style="margin-top: 6px;">
+                <div class="q-serial" style="visibility: hidden;">{{ q.number }}.</div>
+                <div class="q-body">
+                    <div class="q-stem">{{ render_stem(q, "hi") }}</div>
+                    {{ render_options(q, "hi") }}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Default: Bilingual Parallel 50/50 CSS Grid Layout -->
+    <div class="bilingual-grid">
+        {% for q in questions %}
+        <div class="question-row-bilingual" id="q-{{ q.number }}">
+            <!-- Left Column: English -->
+            <article class="q-wrapper" lang="en">
+                <div class="q-serial">{{ q.number }}.</div>
+                <div class="q-body">
+                    <div class="q-stem">{{ render_stem(q, "en") }}</div>
+                    {{ render_options(q, "en") }}
+                    {% if q.answer %}
+                    <div class="answer-key-box"><strong>Key:</strong> {{ q.answer.value }}</div>
+                    {% endif %}
+                </div>
+            </article>
+
+            <!-- Right Column: Hindi / Second Language -->
+            <article class="q-wrapper" lang="hi">
+                <div class="q-serial">{{ q.number }}.</div>
+                <div class="q-body">
+                    <div class="q-stem">{{ render_stem(q, "hi") }}</div>
+                    {{ render_options(q, "hi") }}
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</main>
+
+</body>
+</html>

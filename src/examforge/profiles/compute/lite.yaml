@@ -1,0 +1,8 @@
+# Lite compute tier (low resource, CI runners, 1 CPU)
+tier: lite
+dpi: 120
+workers: 1
+max_image_pixels: 25000000
+second_ocr: on_demand
+paddle_device: cpu
+bank_embeddings: false

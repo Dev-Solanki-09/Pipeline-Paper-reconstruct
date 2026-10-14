@@ -194,7 +194,8 @@ class TestS3ParseStage:
         stage = S3Parse()
         result = stage.run(ctx)
 
-        assert len(result.document.blocks) > 20
-        assert result.metrics["total_blocks"] > 20
+        assert len(result.document.blocks) >= 10
+        assert result.metrics["total_blocks"] >= 10
+        assert result.metrics["early_exit_pages"] == 1
         post_violations = stage.validate_postconditions(result)
         assert len(post_violations) == 0

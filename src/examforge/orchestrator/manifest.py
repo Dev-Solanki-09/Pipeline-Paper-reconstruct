@@ -104,10 +104,10 @@ class Manifest(BaseModel):
         return [s.name for s in self.stages if s.status == "completed"]
 
     def save(self, path: Path) -> None:
-        """Atomically write manifest to disk."""
-        tmp = path.with_suffix(".tmp")
-        tmp.write_text(self.model_dump_json(indent=2))
-        tmp.replace(path)  # atomic on POSIX, best-effort on Windows
+        """Atomically write manifest to disk with fsync."""
+        from examforge.orchestrator.io import atomic_write
+
+        atomic_write(path, self.model_dump_json(indent=2))
 
     @classmethod
     def load(cls, path: Path) -> Manifest:

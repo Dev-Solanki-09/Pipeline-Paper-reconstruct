@@ -1,30 +1,49 @@
-# ExamForge
+# ExamForge build & bytecode
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 *.egg-info/
 dist/
 build/
 .eggs/
 
-# Run artifacts (large, regenerable)
+# Run artifacts, caches, and test outputs (large, regenerable)
 runs/
 .cache/
+temp_test/
+temp_test_run/
+tmp_run/
+tmp_s7/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+issues.jsonl
 
 # Virtual environment
 .venv/
 venv/
+env/
+ENV/
 
-# IDE
+# IDE & Editor
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS
+# OS artifacts
 .DS_Store
 Thumbs.db
+ehthumbs.db
 
-# Environment
+# Environment & Secrets
 .env
-.env.local
+.env.*
+*.pem
+*.key
+

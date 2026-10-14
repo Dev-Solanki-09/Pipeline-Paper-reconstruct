@@ -35,6 +35,7 @@ from examforge.ir.schema import (
     IssueSeverity,
     PageClassification,
     PageInfo,
+    PageProcessingPath,
     PageStatus,
     WatermarkTier,
 )
@@ -66,6 +67,10 @@ class S0Intake(Stage):
     """
 
     name = "s0_intake"
+
+    @classmethod
+    def capabilities(cls) -> list[str]:
+        return ["intake", "render"]
 
     def run(self, ctx: StageContext) -> StageResult:
         source = Path(ctx.document.source_path)
@@ -136,6 +141,9 @@ class S0Intake(Stage):
             # Classify the page
             classification = _classify_page(page, text, page_num, total_pages)
 
+            # Classify processing path (O2.1): Path A (digital), Path B (scanned), Path C (broken font)
+            processing_path = _classify_processing_path(page, text, has_text, legacy)
+
             # Detect blur (Laplacian variance on the rendered image)
             # Deferred to a helper that works on the rendered pixmap
             blur_score = 0.0
@@ -155,6 +163,7 @@ class S0Intake(Stage):
                 height_px=height_px,
                 blur_score=blur_score,
                 classification=classification,
+                processing_path=processing_path,
                 has_text_layer=has_text,
                 text_layer_valid=text_valid,
                 legacy_fonts=legacy,
@@ -176,6 +185,8 @@ class S0Intake(Stage):
 
         # Harvest metadata from cover/instruction pages
         metadata = _harvest_metadata(doc, pages, metadata)
+        if not metadata.exam_name and ctx.resolved_profile and ctx.resolved_profile.name:
+            metadata.exam_name = ctx.resolved_profile.name
 
         doc.close()
 
@@ -242,13 +253,30 @@ def _detect_source_type(doc: fitz.Document) -> str:
 
 
 def _estimate_dpi(page: fitz.Page) -> float:
-    """Estimate the DPI of a page from its dimensions."""
+    """Estimate the DPI of a page from its dimensions or embedded images."""
     rect = page.rect
-    # A4 is 8.27 × 11.69 inches
-    # If width in points / 72 gives us inches, and we know the pixel width
-    width_inches = rect.width / 72.0
-    if width_inches > 0:
-        return 72.0  # PDF points are 1/72 inch by definition
+    # If the page contains embedded images (e.g. scanned page), check native image resolution
+    try:
+        images = page.get_images()
+        if images:
+            max_img_dpi = 0.0
+            doc = page.parent
+            for img in images:
+                xref = img[0]
+                try:
+                    base_image = doc.extract_image(xref)
+                    img_w = base_image.get("width", 0)
+                    if rect.width > 0 and img_w > 0:
+                        img_dpi = (img_w / rect.width) * 72.0
+                        if img_dpi > max_img_dpi:
+                            max_img_dpi = img_dpi
+                except Exception:
+                    pass
+            if max_img_dpi >= 100.0:
+                return round(max_img_dpi, 1)
+    except Exception:
+        pass
+
     return 72.0
 
 
@@ -484,3 +512,41 @@ def _harvest_metadata(
                 metadata.subject = subj
 
     return metadata
+
+
+def _classify_processing_path(
+    page: fitz.Page,
+    text: str,
+    has_text: bool,
+    legacy_fonts: list[str],
+) -> PageProcessingPath:
+    """
+    Classify page into:
+    - Path A: digital with valid text layer (standard fonts, plausible scripts)
+    - Path B: scanned/raster (no usable text layer)
+    - Path C: digital but broken fonts (Type3, missing ToUnicode, legacy 8-bit Hindi fonts)
+    """
+    if legacy_fonts:
+        return PageProcessingPath.PATH_C
+
+    clean_text = text.strip() if text else ""
+    if not has_text or len(clean_text) < 10:
+        return PageProcessingPath.PATH_B
+
+    # Inspect fonts for Type3, missing ToUnicode, or bitmap fonts
+    fonts = _get_page_fonts(page)
+    for f in fonts:
+        f_lower = f.lower()
+        if "type3" in f_lower or "pk" in f_lower:
+            return PageProcessingPath.PATH_C
+
+    # Check replacement character and Private Use Area (PUA) ratios
+    if clean_text:
+        pua_or_replace = sum(
+            1 for ch in clean_text if ch == "\ufffd" or 0xE000 <= ord(ch) <= 0xF8FF
+        )
+        if (pua_or_replace / max(1, len(clean_text))) >= 0.05:
+            return PageProcessingPath.PATH_C
+
+    return PageProcessingPath.PATH_A
+

@@ -1,0 +1,18 @@
+{
+  "sequence_accuracy": 1.0,
+  "count_match": 1.0,
+  "cer_mean": 0.0,
+  "cer_p95": 0.0,
+  "wer_mean": 0.0,
+  "wer_p95": 0.0,
+  "option_accuracy": 1.0,
+  "kind_accuracy": 1.0,
+  "language_completeness": 0.9167,
+  "figure_iou_mean": 1.0,
+  "figure_iou_ge_90": 1.0,
+  "table_similarity": 1.0,
+  "aggregate_score": 1.0,
+  "total_ref_questions": 12,
+  "total_hyp_questions": 12,
+  "details": {}
+}

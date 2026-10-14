@@ -2,26 +2,18 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
 
 from examforge.config import ExamForgeConfig
 from examforge.ir.schema import (
-    BBox,
-    Block,
-    ExamDocument,
-    ExamMetadata,
     Issue,
     IssueSeverity,
-    PageInfo,
-    PageStatus,
 )
-from examforge.orchestrator.manifest import Manifest, StageRecord
+from examforge.orchestrator.manifest import Manifest
 from examforge.orchestrator.runner import (
     EXIT_FAILED,
-    EXIT_NEEDS_REVIEW,
     EXIT_OK,
     EXIT_WARNINGS,
     PipelineRunner,
@@ -30,7 +22,6 @@ from examforge.orchestrator.runner import (
 )
 from examforge.spec import Spec
 from examforge.stages.base import Stage, StageContext, StageResult
-
 
 # ---------------------------------------------------------------------------
 # Stub stages for testing

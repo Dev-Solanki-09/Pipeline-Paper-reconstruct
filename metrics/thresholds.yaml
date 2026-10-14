@@ -1,0 +1,45 @@
+# ExamForge Calibrated Thresholds
+# Enforced by `examforge eval` and phase gates.
+
+version: 1.0.0
+
+thresholds:
+  sequence_accuracy:
+    min: 0.980
+    description: "Share of question-number sequences matching ground truth exactly"
+  count_match:
+    min: 0.980
+    description: "Extracted question count matching ground truth count"
+  cer_mean:
+    max: 0.025
+    description: "Mean Character Error Rate across question stems"
+  cer_p95:
+    max: 0.060
+    description: "95th percentile Character Error Rate"
+  wer_mean:
+    max: 0.050
+    description: "Mean Word Error Rate across question stems"
+  wer_p95:
+    max: 0.100
+    description: "95th percentile Word Error Rate"
+  option_accuracy:
+    min: 0.950
+    description: "Option count and label sequence accuracy"
+  kind_accuracy:
+    min: 0.950
+    description: "QuestionKind classification accuracy"
+  figure_iou_mean:
+    min: 0.850
+    description: "Mean Intersection over Union for figure bounding boxes"
+  figure_iou_ge_90:
+    min: 0.800
+    description: "Share of figure crops with IoU >= 0.90"
+  table_similarity:
+    min: 0.900
+    description: "TEDS-style table structure similarity score"
+  aggregate_score:
+    min: 0.920
+    description: "Composite weighted benchmark accuracy score"
+
+tolerance:
+  max_drop_pp: 0.005 # Maximum permissible regression against baseline (0.5 pp)

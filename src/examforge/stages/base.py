@@ -43,6 +43,7 @@ class StageContext:
     config: ExamForgeConfig
     spec: Spec
     stage_dir: Path
+    profile: Any = None
 
     @property
     def mode(self) -> str:
@@ -51,6 +52,13 @@ class StageContext:
     @property
     def debug(self) -> bool:
         return self.config.debug
+
+    @property
+    def resolved_profile(self) -> Any:
+        if self.profile is not None:
+            return self.profile
+        from examforge.profiles.loader import loader
+        return loader.load("neet_ug")
 
 
 @dataclass
@@ -76,6 +84,11 @@ class Stage(ABC):
     """
 
     name: str = "unnamed"
+
+    @classmethod
+    def capabilities(cls) -> list[str]:
+        """Declare capabilities provided by this stage for capability negotiation."""
+        return []
 
     @abstractmethod
     def run(self, ctx: StageContext) -> StageResult:

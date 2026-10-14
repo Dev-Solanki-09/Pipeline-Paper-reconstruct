@@ -1,0 +1,85 @@
+# Base profile for ExamForge v2
+# Root of all exam profiles. Defines universal defaults.
+
+id: base
+name: Base Exam Profile
+profile_version: "2.0.0"
+engine_min_version: "2.0.0"
+maturity: experimental
+extends: []
+
+languages:
+  - code: en
+    script: Latn
+    direction: ltr
+
+language_layout: monolingual
+
+layout:
+  columns: 1
+  spans_allowed: true
+  reading_order: columns_ltr
+  orientation_policy: portrait
+
+numbering:
+  patterns:
+    - '^\s*(\d{1,3})\s*[.):]'
+    - '^\s*Q\.?\s*(\d{1,3})\s*[.):]?'
+  sections:
+    - 'SECTION\s*[-–:]?\s*[A-Za-z0-9()]+'
+    - 'PART\s*[-–:]?\s*[0-9IVX]+'
+  reset_policy: continuous
+  nesting_labels:
+    - "(a)"
+    - "(b)"
+    - "(c)"
+    - "(d)"
+
+options:
+  label_schemes:
+    - "(1)"
+    - "(2)"
+    - "(3)"
+    - "(4)"
+    - "(A)"
+    - "(B)"
+    - "(C)"
+    - "(D)"
+  count_min: 2
+  count_max: 5
+  count_typical: 4
+  layout_preference: auto
+  image_option_policy: allow
+
+furniture_branding:
+  headers: []
+  footers: []
+  branding: []
+  watermark:
+    enabled: false
+    mode: auto
+    patterns: []
+
+expected_kinds:
+  - mcq1
+
+marking:
+  positive: 1.0
+  negative: 0.0
+  partial: false
+
+answer_key_patterns: []
+
+rules: {}
+autofix_allowlist: []
+
+output:
+  template: exam.html.j2
+  layout_mode: single_column
+  exporters:
+    - html
+    - json
+  include_answers: false
+
+requires: []
+compute: standard

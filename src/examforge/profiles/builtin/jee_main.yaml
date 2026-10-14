@@ -1,0 +1,28 @@
+# JEE (Main) Profile
+id: jee_main
+name: JEE (Main) Joint Entrance Examination
+profile_version: "2.0.0"
+maturity: experimental
+extends:
+  - base
+
+layout:
+  columns: 1
+  reading_order: columns_ltr
+
+numbering:
+  sections:
+    - 'SECTION\s*[-–:]?\s*[A-B]'
+    - 'PHYSICS'
+    - 'CHEMISTRY'
+    - 'MATHEMATICS'
+  reset_policy: per_section
+
+expected_kinds:
+  - mcq1
+  - numerical
+
+marking:
+  positive: 4.0
+  negative: -1.0
+  partial: false

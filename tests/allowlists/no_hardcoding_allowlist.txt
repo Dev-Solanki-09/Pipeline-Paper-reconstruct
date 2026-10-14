@@ -1,0 +1,17 @@
+# Allowlist for tests/test_no_hardcoding.py
+# Format: <file_path>:<literal_pattern> # Explanation
+
+# Default profile fallback in base.py
+src/examforge/stages/base.py:neet_ug # default profile fallback when none specified
+
+# Legacy triage keyword fallbacks in s0_intake.py
+src/examforge/stages/s0_intake.py:neet # legacy cover keyword fallback
+src/examforge/stages/s0_intake.py:jee # legacy cover keyword fallback
+src/examforge/stages/s0_intake.py:upsc # legacy cover keyword fallback
+src/examforge/stages/s0_intake.py:NEET # legacy exam name detection fallback
+src/examforge/stages/s0_intake.py:JEE # legacy exam name detection fallback
+src/examforge/stages/s0_intake.py:UPSC # legacy exam name detection fallback
+src/examforge/stages/s0_intake.py:AIIMS # legacy exam name detection fallback
+
+# Legacy branding keywords in s2_clean.py
+src/examforge/stages/s2_clean.py:fiitjee # legacy branding keyword fallback

@@ -1,0 +1,8 @@
+# GPU compute tier (high-VRAM, GPU accelerated)
+tier: gpu
+dpi: 150
+workers: auto
+max_image_pixels: 120000000
+second_ocr: on_low_confidence
+paddle_device: gpu
+bank_embeddings: true

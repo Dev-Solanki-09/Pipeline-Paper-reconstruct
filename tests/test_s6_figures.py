@@ -146,3 +146,50 @@ class TestS6FiguresStage:
         # Check postconditions pass
         violations = s6.validate_postconditions(result)
         assert len(violations) == 0
+
+    def test_figures_v2_rollback_flag(self, sample_pdf_path, tmp_path):
+        """Setting figures_v2=False rolls back to v1 logic."""
+        if sample_pdf_path is None:
+            pytest.skip("Sample PDF not available")
+
+        from examforge.profiles.schema import ExamProfile
+
+        exam_doc = ExamDocument(
+            source_path=str(sample_pdf_path),
+            source_hash="sample_hash",
+            metadata=ExamMetadata(exam_name="Sample Exam"),
+            pages=[
+                PageInfo(
+                    page_number=4,
+                    has_text_layer=True,
+                    text_layer_valid=True,
+                    classification=PageClassification.QUESTIONS,
+                    width_px=594,
+                    height_px=841,
+                ),
+            ],
+        )
+
+        profile_v1 = ExamProfile(
+            id="v1_test_profile",
+            name="v1_test_profile",
+            description="Testing rollback",
+            flags={"figures_v2": False},
+        )
+
+        ctx = StageContext(
+            document=exam_doc,
+            config=None,
+            spec=None,
+            stage_dir=tmp_path / "s6_v1",
+            run_dir=tmp_path,
+            profile=profile_v1,
+        )
+
+        S3Parse().run(ctx)
+        S4Structure().run(ctx)
+        s6 = S6Figures()
+        result = s6.run(ctx)
+
+        assert result.document is not None
+        assert s6.validate_postconditions(result) == []

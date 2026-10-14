@@ -1,0 +1,16 @@
+# Generic Monolingual Exam Profile
+id: generic_mono
+name: Generic Monolingual Exam
+profile_version: "2.0.0"
+maturity: experimental
+extends:
+  - base
+
+language_layout: monolingual
+
+layout:
+  columns: 1
+  reading_order: columns_ltr
+
+output:
+  layout_mode: single_column

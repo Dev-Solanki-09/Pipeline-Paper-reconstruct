@@ -1,0 +1,17 @@
+# GATE (Graduate Aptitude Test in Engineering) Profile
+id: gate
+name: Graduate Aptitude Test in Engineering (GATE)
+profile_version: "2.0.0"
+maturity: experimental
+extends:
+  - base
+
+expected_kinds:
+  - mcq1
+  - mcq_multi
+  - numerical
+
+marking:
+  positive: 2.0
+  negative: -0.66
+  partial: false

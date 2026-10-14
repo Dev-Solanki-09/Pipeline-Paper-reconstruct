@@ -40,6 +40,10 @@ class S6Figures(Stage):
 
     name = "s6_figures"
 
+    @classmethod
+    def capabilities(cls) -> list[str]:
+        return ["figures", "crop_extractor"]
+
     def validate_preconditions(self, ctx: StageContext) -> list[str]:
         """S6 requires pages and questions to be populated."""
         violations = []
@@ -76,7 +80,52 @@ class S6Figures(Stage):
                 if p.classification not in (PageClassification.COVER, PageClassification.ROUGH_WORK, PageClassification.BLANK)
             }
 
+        # Check feature flag
+        use_figures_v2 = True
+        if ctx.profile and hasattr(ctx.profile, "flags") and ctx.profile.flags is not None:
+            use_figures_v2 = ctx.profile.flags.get("figures_v2", True)
+        elif ctx.config and hasattr(ctx.config, "flags") and ctx.config.flags is not None:
+            use_figures_v2 = ctx.config.flags.get("figures_v2", True)
+
         img_counter = 0
+
+        if not use_figures_v2:
+            # v1 rollback logic
+            for page_info in doc.pages:
+                page_num = page_info.page_number
+                if page_num not in question_page_numbers:
+                    continue
+
+                page_idx = page_num - 1
+                if page_idx >= len(pdf_doc):
+                    continue
+
+                page = pdf_doc[page_idx]
+                page_figures, img_counter = _extract_embedded_images(
+                    pdf_doc, page, page_num, figures_dir, img_counter
+                )
+                all_figures.extend(page_figures)
+
+            pdf_doc.close()
+
+            # Assign figures to questions (v1)
+            if doc.questions:
+                _assign_figures_to_questions(all_figures, doc.questions)
+
+            doc.figures = all_figures
+            metrics["figures_extracted"] = len(all_figures)
+            metrics["figures_assigned"] = sum(1 for f in all_figures if f.question_ref)
+            return StageResult(document=doc, metrics=metrics, issues=issues)
+
+        # figures_v2 pipeline
+        from examforge.figures.associate import associate_figures_to_questions
+        from examforge.figures.vector import (
+            extract_vector_figures,
+            find_repeated_vector_signatures,
+        )
+
+        watermark_sigs = find_repeated_vector_signatures(pdf_doc, min_pages=3)
+
         for page_info in doc.pages:
             page_num = page_info.page_number
             if page_num not in question_page_numbers:
@@ -87,16 +136,36 @@ class S6Figures(Stage):
                 continue
 
             page = pdf_doc[page_idx]
-            page_figures, img_counter = _extract_embedded_images(
+
+            # 1. Embedded raster images
+            page_raster_figures, img_counter = _extract_embedded_images(
                 pdf_doc, page, page_num, figures_dir, img_counter
             )
-            all_figures.extend(page_figures)
+            all_figures.extend(page_raster_figures)
+
+            # 2. Vector drawings (circuits, ray diagrams, geometry)
+            page_vector_figures = extract_vector_figures(
+                doc=pdf_doc,
+                page=page,
+                page_num=page_num,
+                output_dir=figures_dir,
+                watermark_signatures=watermark_sigs,
+                img_counter_start=img_counter,
+            )
+            img_counter += len(page_vector_figures)
+            all_figures.extend(page_vector_figures)
 
         pdf_doc.close()
 
-        # Assign figures to questions
+        # Multi-signal association
         if doc.questions:
-            _assign_figures_to_questions(all_figures, doc.questions)
+            assoc_issues = associate_figures_to_questions(
+                figures=all_figures,
+                questions=doc.questions,
+                blocks=doc.blocks,
+                allow_proportional_fallback=False,
+            )
+            issues.extend(assoc_issues)
 
         doc.figures = all_figures
 
@@ -104,7 +173,7 @@ class S6Figures(Stage):
         metrics["figures_assigned"] = sum(1 for f in all_figures if f.question_ref)
 
         logger.info(
-            "  S6 Figures complete: %d figures extracted, %d assigned to questions",
+            "  S6 Figures v2 complete: %d figures extracted, %d assigned to questions",
             len(all_figures),
             metrics["figures_assigned"],
         )
@@ -142,6 +211,29 @@ def _classify_figure(
         return None
 
     return FigureClass.DIAGRAM
+
+
+def _determine_scale_class(width_px: int, height_px: int) -> str:
+    """Map figure dimensions to canonical NEET/JEE diagram scale taxonomy:
+
+    - img-inline: tiny inline icons or small symbols (height <= 40)
+    - img-opt: option-level diagrams (height <= 65, width <= 220)
+    - img-sm: small diagrams (height <= 120, width <= 240)
+    - img-wide: wide panoramic graphs or circuits (width/height > 1.8)
+    - img-lg: large multi-part diagrams (height >= 280)
+    - img-md: standard medium diagrams (default)
+    """
+    if height_px <= 40:
+        return "img-inline"
+    if height_px <= 65 and width_px <= 220:
+        return "img-opt"
+    if height_px <= 120 and width_px <= 240:
+        return "img-sm"
+    if width_px / max(height_px, 1) > 1.8 and height_px <= 180:
+        return "img-wide"
+    if height_px >= 280 or width_px >= 340:
+        return "img-lg"
+    return "img-md"
 
 
 def _extract_embedded_images(
@@ -196,6 +288,8 @@ def _extract_embedded_images(
             width_mm = round((rect.width / 72.0) * 25.4, 1)
             height_mm = round((rect.height / 72.0) * 25.4, 1)
 
+            scale_class = _determine_scale_class(pix.width, pix.height)
+
             fig = Figure(
                 id=fig_id,
                 page=page_num,
@@ -208,6 +302,7 @@ def _extract_embedded_images(
                 crop_path=str(crop_path),
                 format="png",
                 classification=classification,
+                scale_class=scale_class,
                 width_mm=width_mm,
                 height_mm=height_mm,
                 status=BlockStatus.TRUSTED,
@@ -231,14 +326,23 @@ def _assign_figures_to_questions(
         if not same_page_questions:
             continue
 
+        same_page_questions.sort(key=lambda q: (q.sequence_index or 0, q.number or 0))
+        num_qs = len(same_page_questions)
+
         # Sort candidate questions by their vertical start position on this page
-        def _get_q_y_span(q: Question) -> tuple[float, float]:
-            page_blocks = [b for b in q.stem_en if b.page == figure.page]
-            if not page_blocks:
-                return (0.0, 9999.0)
-            y_min = min(b.bbox.y1 for b in page_blocks)
-            y_max = max(b.bbox.y2 for b in page_blocks)
-            return (y_min, y_max)
+        def _get_q_y_span(q: Question, idx: int) -> tuple[float, float]:
+            all_blocks = [b for b in (q.stem_en + q.stem_hi) if b.page == figure.page]
+            for opt in q.options:
+                all_blocks.extend([b for b in (opt.text_en + opt.text_hi) if b.page == figure.page])
+
+            if all_blocks:
+                y_min = min(b.bbox.y1 for b in all_blocks)
+                y_max = max(b.bbox.y2 for b in all_blocks)
+                return (y_min, y_max)
+
+            # Fallback when blocks are not attached: estimate vertical section on page
+            est_h = 842.0 / max(1, num_qs)
+            return (idx * est_h, (idx + 1) * est_h)
 
         best_q: Optional[Question] = None
         min_distance = float("inf")
@@ -246,7 +350,7 @@ def _assign_figures_to_questions(
         fig_y = figure.bbox.y1
 
         for i, q in enumerate(same_page_questions):
-            y_min, y_max = _get_q_y_span(q)
+            y_min, y_max = _get_q_y_span(q, i)
             # If figure is inside or immediately following question stem
             if y_min <= fig_y <= y_max:
                 best_q = q
@@ -255,7 +359,7 @@ def _assign_figures_to_questions(
             # If figure is between this question and next question
             next_y_min = float("inf")
             if i + 1 < len(same_page_questions):
-                next_y_min, _ = _get_q_y_span(same_page_questions[i + 1])
+                next_y_min, _ = _get_q_y_span(same_page_questions[i + 1], i + 1)
 
             if y_min <= fig_y < next_y_min:
                 best_q = q

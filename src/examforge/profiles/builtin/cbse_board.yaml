@@ -1,0 +1,13 @@
+# CBSE Board Examination Profile
+id: cbse_board
+name: CBSE Board Examination
+profile_version: "2.0.0"
+maturity: experimental
+extends:
+  - base
+
+expected_kinds:
+  - mcq1
+  - short_answer
+  - long_answer
+  - assertion_reason

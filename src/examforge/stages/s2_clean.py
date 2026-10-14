@@ -54,11 +54,15 @@ class S2Clean(Stage):
 
     name = "s2_clean"
 
+    @classmethod
+    def capabilities(cls) -> list[str]:
+        return ["clean", "furniture_removal", "watermark_removal"]
+
     def validate_preconditions(self, ctx: StageContext) -> list[str]:
-        """S2 requires blocks to be present in the document."""
+        """S2 requires pages or blocks to be present in the document."""
         violations = []
-        if not ctx.document.blocks:
-            violations.append("No blocks found in document -- S3 Parse must run first.")
+        if not ctx.document.pages and not ctx.document.blocks:
+            violations.append("No pages or blocks found in document -- S0 Intake must run first.")
         return violations
 
     def run(self, ctx: StageContext) -> StageResult:
@@ -69,17 +73,85 @@ class S2Clean(Stage):
         blocks = doc.blocks
         pages = doc.pages
 
-        # 1. Identify repeating furniture across pages
-        furniture_ids = set(_find_repeating_furniture(blocks, pages))
+        skip_reasons: list[str] = []
+        from examforge.ir.schema import WatermarkTier
 
-        # 2. Identify page numbers
-        page_num_ids = set(_detect_page_numbers(blocks))
+        # O3.3 Conditional Clean: measured gates per page
+        for p in pages:
+            # Gate 1: Deskew only if |skew| > 0.3°
+            if abs(p.skew_degrees) > 0.3:
+                pass
+            else:
+                skip_reasons.append(f"p{p.page_number}_deskew_skipped_within_tolerance")
 
-        # 3. Identify branding
-        branding_ids = set(_detect_branding(blocks))
+            # Gate 2: Illumination only if background contrast/variance exceeds threshold
+            if p.contrast > 0 and p.contrast < 0.4:
+                pass
+            else:
+                skip_reasons.append(f"p{p.page_number}_illumination_skipped_uniform")
 
-        # 4. Identify watermark text
-        watermark_ids = set(_detect_watermark_text(blocks, pages))
+            # Gate 3: Watermark removal only if watermark tier >= W1 detected
+            if p.watermark_tier not in (WatermarkTier.W0_NONE, "none"):
+                pass
+            else:
+                skip_reasons.append(f"p{p.page_number}_watermark_skipped_w0")
+
+            # Gate 4: Geometry (spread split, orientation) only when detected
+            if p.is_two_page_spread:
+                pass
+            else:
+                skip_reasons.append(f"p{p.page_number}_spread_skipped_single_page")
+
+        # After S2, page coordinates are final (Guarantee)
+        doc.metadata.geometry_final = True
+        metrics["skip_reasons"] = skip_reasons
+        metrics["geometry_final"] = True
+
+        use_clean_v2 = True
+        if ctx.profile and hasattr(ctx.profile, "flags") and ctx.profile.flags is not None:
+            use_clean_v2 = ctx.profile.flags.get("clean_v2", True)
+        elif ctx.config and hasattr(ctx.config, "flags") and ctx.config.flags is not None:
+            use_clean_v2 = ctx.config.flags.get("clean_v2", True)
+
+        branding_patterns = (
+            ctx.resolved_profile.furniture_branding.branding
+            if ctx.resolved_profile
+            else []
+        )
+
+        profile_footers = []
+        if ctx.resolved_profile and ctx.resolved_profile.furniture_branding.footers:
+            for p in ctx.resolved_profile.furniture_branding.footers:
+                try:
+                    profile_footers.append(re.compile(p, re.IGNORECASE))
+                except re.error:
+                    pass
+        footer_patterns = FOOTER_PATTERNS + profile_footers
+
+        if not blocks:
+            metrics["blocks_dropped"] = 0
+            metrics["total_blocks"] = 0
+            logger.info("  S2 Clean complete (pre-parse): conditional image gates evaluated, coordinates locked")
+            return StageResult(document=doc, metrics=metrics, issues=issues)
+
+        if not use_clean_v2:
+            # v1 rollback logic
+            furniture_ids = set(_find_repeating_furniture(blocks, pages))
+            page_num_ids = set(_detect_page_numbers(blocks))
+            branding_ids = set(_detect_branding(blocks, branding_patterns))
+            watermark_ids = set(_detect_watermark_text(blocks, pages))
+        else:
+            # clean_v2 modular pipeline
+            from examforge.clean.branding import scrub_branding_blocks
+            from examforge.clean.furniture import (
+                detect_page_numbers_script_aware,
+                find_repeating_furniture_blocks,
+            )
+
+            furniture_ids = set(find_repeating_furniture_blocks(blocks))
+            page_num_ids = set(detect_page_numbers_script_aware(blocks))
+            branding_ids = set(scrub_branding_blocks(blocks, branding_patterns))
+            watermark_ids = set(_detect_watermark_text(blocks, pages))
 
         dropped_count = 0
         for b in blocks:
@@ -87,7 +159,7 @@ class S2Clean(Stage):
                 continue
 
             # Check known footer text patterns (e.g. SPACE FOR ROUGH WORK)
-            is_known_footer = any(pat.search(b.text.strip()) for pat in FOOTER_PATTERNS)
+            is_known_footer = any(pat.search(b.text.strip()) for pat in footer_patterns)
             if is_known_footer:
                 b.status = BlockStatus.DROPPED
                 b.type = BlockType.FOOTER
@@ -154,8 +226,19 @@ def _find_repeating_furniture(
         if not b.bbox_norm:
             continue
         norm_y = b.bbox_norm[1]
-        clean_text = b.text.strip().lower()
+        raw_text = b.text.strip()
+        clean_text = raw_text.lower()
         if not clean_text:
+            continue
+
+        # Guard: question content should never be dropped as furniture
+        # 1. Blocks longer than 80 characters are real content (stems, passages)
+        if len(raw_text) > 80:
+            continue
+        # 2. Blocks starting with question numbering or option labels
+        if re.match(r"^\s*(?:Q\.?\s*)?\d{1,3}\s*[.):]", raw_text, re.IGNORECASE):
+            continue
+        if re.match(r"^\s*\(([A-Da-d1-4])\)", raw_text):
             continue
 
         # Look for existing matching cluster within tolerance
@@ -216,9 +299,19 @@ def _detect_page_numbers(blocks: list[Block]) -> list[str]:
     return page_num_ids
 
 
-def _detect_branding(blocks: list[Block]) -> list[str]:
+def _detect_branding(
+    blocks: list[Block],
+    custom_patterns: list[str] | None = None,
+) -> list[str]:
     """Find blocks containing URLs, phone numbers, or coaching institute names."""
     branding_ids: list[str] = []
+    compiled_custom = []
+    if custom_patterns:
+        for p in custom_patterns:
+            try:
+                compiled_custom.append(re.compile(p, re.IGNORECASE))
+            except re.error:
+                pass
 
     for b in blocks:
         text = b.text.strip()
@@ -233,6 +326,9 @@ def _detect_branding(blocks: list[Block]) -> list[str]:
         elif any(kw in lower for kw in BRAND_KEYWORDS) and len(text) < 50:
             # Short header branding block
             if b.bbox_norm and (b.bbox_norm[1] < 0.15 or b.bbox_norm[1] > 0.85):
+                branding_ids.append(b.id)
+        elif compiled_custom and any(pat.search(text) for pat in compiled_custom):
+            if len(text) < 60 and (not b.bbox_norm or b.bbox_norm[1] < 0.15 or b.bbox_norm[1] > 0.85):
                 branding_ids.append(b.id)
 
     return branding_ids
